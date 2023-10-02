@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->foreignId('column_id')->constrained();
+            $table->foreignId('column_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

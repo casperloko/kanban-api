@@ -2,28 +2,39 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\DTO\UserDTO;
+use App\DTO\UserRegisterDTO;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Http\Requests\UserCreateRequest;
+use App\Http\Resources\UserAuthResourse;
+use App\Services\User\UserService;
 use Illuminate\Http\Responce;
-use Illuminate\Support\Facades\Hash;
 
 class RegisteredUserController extends Controller
 {
-    public function store(Request $request)
+    protected $service;
+
+    public function __construct(UserService $service)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:20'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'min:8'],
-        ]);
+        $this->service = $service;
+    }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password)
-        ]);
+    public function store(UserCreateRequest $request)
+    {
+        $dto = new UserRegisterDTO(
+            $request->name,
+            $request->email,
+            $request->password,
+            false
+        );
 
-        return response()->json(['message' => 'ok', 'data' => $user], 201);
+        $user = $this->service->store($dto);
+
+        $user = new UserDTO(
+            $user,
+            auth()->login($user)
+        );
+
+        return new UserAuthResourse($user);
     }
 }

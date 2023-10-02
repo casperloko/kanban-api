@@ -22,7 +22,8 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'name',
         'email',
-        'password'
+        'password',
+        'is_admin'
     ];
 
     /**
@@ -33,6 +34,10 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+        'updated_at',
+        'created_at',
+        'is_admin',
+        'email_verified_at'
     ];
 
     /**
@@ -48,6 +53,11 @@ class User extends Authenticatable implements JWTSubject
     public function boards(): HasMany
     {
         return $this->hasMany(Board::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->is_admin === true;
     }
 
     public function getJWTIdentifier()

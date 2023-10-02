@@ -5,6 +5,8 @@ use \App\Http\Controllers\V1\BoardController;
 use \App\Http\Controllers\V1\ColumnController;
 use \App\Http\Controllers\V1\CardController;
 use App\Http\Controllers\V1\RegisteredUserController;
+use App\Http\Controllers\V1\StatisticController;
+use App\Http\Controllers\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,16 +20,25 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
 Route::group(['prefix' => 'v1'], function (){
     Route::post('/registration', [RegisteredUserController::class, 'store']);
     Route::post('/login', [AuthController::class, 'login']);
 
-//
-    Route::middleware(['api', 'auth'])->controller(BoardController::class)->group(function ()
+    Route::middleware(['api', 'auth', 'admin'])->group(function(){
+        Route::get('/statistic', [StatisticController::class, 'index']);
+    });
+
+
+    Route::middleware(['api', 'auth'])->group(function ($router)
     {
+        Route::get('/profile', [UserController::class, 'profile']);
+        Route::put('/profile', [UserController::class, 'update']);
+        Route::put('/profile/password', [UserController::class, 'changePassword']);
+        Route::delete('/profile', [UserController::class, 'destroy']);
+
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+
         Route::get('/boards', [BoardController::class, 'index']);
         Route::get('/boards/{id}', [BoardController::class, 'show']);
         Route::post('/boards', [BoardController::class, 'store']);

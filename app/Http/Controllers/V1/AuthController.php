@@ -2,53 +2,40 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\DTO\UserDTO;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Http\Responce;
+use App\Http\Requests\AuthRequest;
+use App\Http\Resources\UserAuthResourse;
 
 class AuthController extends Controller
 {
 
-    public function login (Request $request)
+    public function login (AuthRequest $request)
     {
-        $credentials = request(['email', 'password']);
-
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        if (! $token = auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token);
+        $user = new UserDTO(
+            auth()->user(),
+            $token
+        );
+
+        return new UserAuthResourse($user);
     }
 
     public function logout()
     {
         auth()->logout();
-        return new SuccessResource(null);
+        return response()->json(['message' => 'Ok'], 204);
     }
 
-    public function me()
-    {
-        return response()->json(auth()->user());
-    }
 
     public function refresh()
     {
-        return $this->respondWithToken(auth()->refresh());
-    }
-
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'token' => auth()->refresh()
         ]);
     }
+
 }

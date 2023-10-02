@@ -10,12 +10,13 @@ class ErrorResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'errors' => $this->getMessage()
+//            'message' => $this->getMessage(),
+//            'errors' => $this->getString()
         ];
     }
 
-    public function toResponse($request)
-    {
-        return (new ResourceResponse($this))->toResponse($request)->setStatusCode(422);
-    }
+//    public function toResponse($request)
+//    {
+//        return (new ResourceResponse($this))->toResponse($request)->setStatusCode(422);
+//    }
 }
